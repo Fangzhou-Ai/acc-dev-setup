@@ -15,10 +15,16 @@ Do not run `salloc`, `podman`, or setup scripts until they answer.
 | **Yes** | Run `start_allocation.sh` or the workflow in `.cursor/rules/mi355-container-setup.mdc` |
 | **No** | Continue with whatever they asked |
 
+## User-specified image (one-off)
+
+If the user explicitly provides an image (address, tag, or ID), use that image for this run only — pass `IMAGE=...` (and optional `CONTAINER_NAME`, `PORT_MAP`) when calling `setup_on_node.sh`. **Do not** update `rocm_stack.env` or other repo files.
+
+After the container is created, **always report the container name** to the user.
+
 ## What “setup” means
 
 1. `salloc` an exclusive MI355 node (8h job `vllm-dev-setup`)
-2. On that node: pull `vllm/vllm-openai-rocm:nightly`, start `vllm-dev` with GPU devices
+2. On that node: pull default `vllm/vllm-openai-rocm:nightly`, start `vllm-dev` with GPU devices (unless user overrode `IMAGE` / `CONTAINER_NAME` above)
 3. Install oh-my-bash, Cursor Agent, **Claude Code** (`claude`), **Codex** (`codex`), **tmux** in the container; copy host `~/.ssh` into the container for private `git clone`
 4. Configure podman-as-docker shim for VS Code Dev Containers
 5. Write `connection_info.txt` with node name and job ID

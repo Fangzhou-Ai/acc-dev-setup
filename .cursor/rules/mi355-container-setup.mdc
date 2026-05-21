@@ -44,6 +44,15 @@ Wait for yes/no. Do not run SLURM or podman commands until they confirm.
    ```
    Or use: `./start_allocation.sh` (allocates + sets up in one step).
 
+   **User-specified image (one-off — do not edit repo files):**
+   - If the user gives an explicit image (registry address, tag, or local image ID), use **only** runtime env vars — do **not** change `rocm_stack.env`, `setup_container.sh`, or other pinned defaults.
+   - On the compute node:
+     ```bash
+     IMAGE=<user-image> CONTAINER_NAME=<name-if-given> PORT_MAP=<port-if-given> \
+       srun --jobid=$JOBID --overlap bash /shared/amdgpu/home/fai_qle/prepare_env/setup_on_node.sh
+     ```
+   - After setup finishes, **always tell the user the container name** (`CONTAINER_NAME` from the script output / `podman ps`).
+
    **Container rules (always):**
    - Mount `-v /data:/data` (local scratch)
    - Mount `-v /shared/data/amd_int/models:/shared/data/amd_int/models`
