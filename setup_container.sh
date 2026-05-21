@@ -54,9 +54,13 @@ if podman container exists "${CONTAINER_NAME}" 2>/dev/null; then
   podman rm -f "${CONTAINER_NAME}"
 fi
 
+DEVCONTAINER_METADATA='{"workspaceFolder":"/root","remoteUser":"root"}'
+
 echo "==> Starting container ${CONTAINER_NAME}..."
 podman run -d \
   --name "${CONTAINER_NAME}" \
+  --workdir /root \
+  --label "dev.containers.metadata=${DEVCONTAINER_METADATA}" \
   "${VLLM_OPENAI_ENTRYPOINT[@]}" \
   --ipc=host \
   --privileged \

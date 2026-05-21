@@ -71,7 +71,7 @@ Test in PowerShell: `ssh mi355-gpu-39`
 2. **Command Palette** → **Dev Containers: Attach to Running Container...** → **`vllm-dev`**
 3. Remote user: **`root`**
 
-VS Code opens **`/root`** in the container. Put your own files there. (The image also has vLLM at `/app/vllm` if you need it — ignore that unless you want it.)
+VS Code should open **`/root`** (not `/root/vllm` or `/app/vllm`). If it opens a old folder, use **Dev Containers: Open Named Configuration File** → `vllm-dev` → set `"workspaceFolder": "/root"` per [`attached-container.vllm-dev.json`](./attached-container.vllm-dev.json). vLLM sources in the image live under `/app/vllm` if you need them.
 
 Machine settings on the node already point VS Code at the podman shim:
 

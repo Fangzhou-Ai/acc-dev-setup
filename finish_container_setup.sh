@@ -7,6 +7,11 @@ SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
 # shellcheck source=rocm_stack.env
 source "${SCRIPT_DIR}/rocm_stack.env"
 
+echo "==> Dev container metadata (default workspace /root)..."
+podman exec "${CONTAINER_NAME}" mkdir -p /root/.devcontainer
+podman cp "${SCRIPT_DIR}/container.devcontainer.json" \
+  "${CONTAINER_NAME}:/root/.devcontainer/devcontainer.json"
+
 echo "==> HF_HOME=${HF_HOME} in ${CONTAINER_NAME}..."
 podman exec "${CONTAINER_NAME}" bash -c \
   "mkdir -p '${HF_HOME}'; printf '%s\n' 'export HF_HOME=${HF_HOME}' > /etc/profile.d/hf_home.sh"

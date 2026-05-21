@@ -169,9 +169,11 @@ EOF
 1. Install **Remote - SSH** and **Dev Containers** extensions.
 2. **Remote-SSH: Connect to Host...** → your node (e.g. `mi355-gpu-40`).
 3. **Dev Containers: Attach to Running Container...** → `vllm-dev`.
-4. Remote user: **`root`** — workspace opens at **`/root`** (put your own files there).
+4. Remote user: **`root`** — workspace should open at **`/root`** (put your own files there).
 
-`.devcontainer/devcontainer.json` in this folder sets `workspaceFolder` to `/root`.
+Setup sets container `--workdir /root` and `dev.containers.metadata` so attach defaults to `/root`, not `/app/vllm` or a remembered `/root/vllm` clone.
+
+**If VS Code still opens `/root/vllm`:** it is reusing a previous attach session. On your PC run **Dev Containers: Open Named Configuration File** → pick **`vllm-dev`** → ensure `"workspaceFolder": "/root"` (see [`attached-container.vllm-dev.json`](./attached-container.vllm-dev.json)). Then re-attach, or use **File → Open Folder** → `/root`.
 
 ---
 

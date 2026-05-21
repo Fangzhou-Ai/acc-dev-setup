@@ -5,6 +5,7 @@
   "workspaceFolder": "/root",
   "runArgs": [
     "--name", "vllm-dev",
+    "--workdir", "/root",
     "--entrypoint", "/bin/bash",
     "--ipc=host",
     "--privileged",
