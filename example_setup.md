@@ -99,6 +99,8 @@ Always mount `/data` (local scratch) and `/shared/data/amd_int/models` with `HF_
 
 `setup_on_node.sh` resolves the image ID automatically.
 
+After the container starts, `setup_container.sh` copies your cluster `~/.ssh` (from shared home, same keys as the login node) into `/root/.ssh` and `/home/vscode/.ssh` so `git clone` over SSH works without new keys. Override with `SSH_SOURCE_DIR=/path/to/.ssh` if needed.
+
 ### Verify GPUs inside the container
 
 ```bash

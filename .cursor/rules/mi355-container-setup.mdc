@@ -51,6 +51,7 @@ Wait for yes/no. Do not run SLURM or podman commands until they confirm.
    - `vllm-openai*` images: `--entrypoint /bin/bash -c "sleep infinity"` (default entrypoint is `vllm`)
    - Install **tmux** (`apt-get install tmux` in `setup_container.sh`; also in `install_container_tools.sh`)
    - Install: Oh My Bash, Cursor agent, Claude Code, Codex (`install_container_tools.sh`)
+   - Copy host `~/.ssh` into container (`copy_ssh_to_container.sh`) for private git over SSH
 
 4. **Update** `connection_info.txt` with current `SLURM_JOB_ID`, `NODE`, and SSH `Host` name.
 

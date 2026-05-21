@@ -19,7 +19,7 @@ Do not run `salloc`, `podman`, or setup scripts until they answer.
 
 1. `salloc` an exclusive MI355 node (8h job `vllm-dev-setup`)
 2. On that node: pull ROCm vLLM image, start `vllm-dev` with GPU devices
-3. Install oh-my-bash, Cursor Agent, **Claude Code** (`claude`), **Codex** (`codex`), **tmux** in the container
+3. Install oh-my-bash, Cursor Agent, **Claude Code** (`claude`), **Codex** (`codex`), **tmux** in the container; copy host `~/.ssh` into the container for private `git clone`
 4. Configure podman-as-docker shim for VS Code Dev Containers
 5. Write `connection_info.txt` with node name and job ID
 

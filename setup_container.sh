@@ -82,6 +82,8 @@ echo "==> vscode user..."
 podman exec "${CONTAINER_NAME}" bash -c \
   'useradd -m -s /bin/bash -u 1000 vscode 2>/dev/null || true; echo "vscode ALL=(ALL) NOPASSWD:ALL" > /etc/sudoers.d/vscode; chmod 440 /etc/sudoers.d/vscode; usermod -aG render vscode 2>/dev/null || true'
 
+HOME_DIR="${HOME_DIR}" "${SCRIPT_DIR}/copy_ssh_to_container.sh" "${CONTAINER_NAME}"
+
 echo "==> Oh My Bash (root + vscode)..."
 OMB_INSTALL='bash -c "$(curl -fsSL https://raw.githubusercontent.com/ohmybash/oh-my-bash/master/tools/install.sh)" --unattended'
 podman exec "${CONTAINER_NAME}" bash -c "${OMB_INSTALL}"

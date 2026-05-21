@@ -46,6 +46,8 @@ cd /shared/amdgpu/home/fai_qle/prepare_env
 
 Or manually follow `example_setup.md` (pull image, `podman run`, fake `docker` shim).
 
+`setup_container.sh` copies your cluster `~/.ssh` into the container (`/root` and `vscode`) for private `git clone`. To refresh an existing container: `./copy_ssh_to_container.sh vllm-dev`.
+
 ## 3. Connect with VS Code on your PC (Windows)
 
 ### SSH config — add to `C:\Users\fai\.ssh\config`
