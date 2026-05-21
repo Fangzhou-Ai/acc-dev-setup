@@ -1,0 +1,84 @@
+---
+description: On session start, offer MI355 GPU node + vllm-dev container setup
+alwaysApply: true
+---
+
+# MI355 container workspace
+
+This folder (`prepare_env`) is for allocating a MI355X GPU node and running a Podman dev container for VS Code Remote SSH + Dev Containers.
+
+**Always follow [`example_setup.md`](../../example_setup.md)** for the baseline workflow (salloc, podman pull/run, docker shim, VS Code attach). Use scripts to automate it.
+
+## First message in every new session
+
+Before doing anything else, ask the user:
+
+> **Do you want to set up a MI355 GPU node and `vllm-dev` container now?** (salloc → podman → oh-my-bash, Cursor agent, Claude Code, Codex, tmux → VS Code attach)
+
+Wait for yes/no. Do not run SLURM or podman commands until they confirm.
+
+- If **no** or they have another task: proceed with their request only.
+- If **yes**: follow the workflow below and report node name, job ID, and SSH host when done.
+
+## Setup workflow (when user says yes)
+
+1. **Check existing allocation**
+   - `squeue -u fai_qle`
+   - If a `vllm-dev-setup` job is already running, reuse that node; skip new `salloc` unless user wants a fresh one.
+
+2. **Allocate a node** (pick first reservation that succeeds; 8h default)
+   ```bash
+   salloc --reservation=mi355-gpu-34_gpu-39_gpu-40_gpu-49_gpu-50_gpu-51_gpu-55_gpu-56_reservation \
+     --exclusive --account=wrh --mem=0 -N1 --time=08:00:00 -J vllm-dev-setup --no-shell
+   ```
+   OR second reservation:
+   ```bash
+   salloc --reservation=mi355-gpu-41_gpu-42_gpu-43_gpu-44_gpu-45_gpu-46_gpu-47_gpu-48_reservation \
+     --exclusive --account=wrh --mem=0 -N1 --time=08:00:00 -J vllm-dev-setup --no-shell
+   ```
+
+3. **Run setup on the allocated node** (use `setup_container.sh` — canonical; `setup_on_node.sh` wraps it)
+   ```bash
+   JOBID=<from squeue>
+   srun --jobid=$JOBID --nodelist=$NODE --overlap bash /shared/amdgpu/home/fai_qle/prepare_env/setup_on_node.sh
+   ```
+   Or use: `./start_allocation.sh` (allocates + sets up in one step).
+
+   **Container rules (always):**
+   - Mount `-v /data:/data` (local scratch)
+   - Mount `-v /shared/data/amd_int/models:/shared/data/amd_int/models`
+   - Set `HF_HOME=/shared/data/amd_int/models` (`-e` at run + `/etc/profile.d` + `.bashrc` for root/vscode)
+   - `vllm-openai*` images: `--entrypoint /bin/bash -c "sleep infinity"` (default entrypoint is `vllm`)
+   - Install **tmux** (`apt-get install tmux` in `setup_container.sh`; also in `install_container_tools.sh`)
+   - Install: Oh My Bash, Cursor agent, Claude Code, Codex (`install_container_tools.sh`)
+
+4. **Update** `connection_info.txt` with current `SLURM_JOB_ID`, `NODE`, and SSH `Host` name.
+
+5. **Tell the user** how to connect from local VS Code:
+   - SSH host = allocated node (e.g. `mi355-gpu-39`)
+   - ProxyJump `amd-login`, user `fai_qle`
+   - Dev Containers → Attach to Running Container → `vllm-dev`, user `root` (workspace `/root`)
+   - See `README.md` and `connection_info.txt`
+
+## Key paths
+
+| Item | Path |
+|------|------|
+| Setup script | `setup_container.sh` (wrapper: `setup_on_node.sh`) |
+| Local scratch | `/data` → `/data` |
+| HF models/cache | `/shared/data/amd_int/models` → same path, `HF_HOME` set |
+| AI CLIs install | `install_container_tools.sh` (tmux, Claude Code, Codex) |
+| One-shot alloc+setup | `start_allocation.sh` |
+| Podman→docker shim | `/shared/amdgpu/home/fai_qle/bin/docker` |
+| VS Code dockerPath | `.vscode-server/data/Machine/settings.json` on shared home |
+| Container name | `vllm-dev` |
+| ROCm (stable) | **7.2.3** — see `rocm_stack.env` |
+| Image | `rocm/vllm-dev:rocm7.2.3_torch2.11_v0.21.0_20260519` |
+
+## Release when done
+
+```bash
+scancel <JOBID>
+```
+
+Reference: **`example_setup.md`** (canonical), `README.md`.

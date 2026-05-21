@@ -1,0 +1,15 @@
+# Copy to connection_info.txt after setup (auto-written by start_allocation.sh)
+SLURM_JOB_ID=
+SLURM_JOB_NAME=vllm-dev-setup
+NODE=mi355-gpu-XX
+HF_HOME=/shared/data/amd_int/models
+
+# VS Code: Remote-SSH -> <NODE> -> Dev Containers: Attach to vllm-dev
+# Release: scancel <SLURM_JOB_ID>
+
+Host mi355-gpu-XX
+    HostName mi355-gpu-XX
+    User YOUR_USER
+    IdentityFile ~/.ssh/id_ed25519
+    ProxyJump amd-login
+    ServerAliveInterval 60

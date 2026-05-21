@@ -1,0 +1,27 @@
+{
+  "name": "vllm-dev (ROCm)",
+  "image": "docker.io/rocm/vllm-dev:rocm7.2.3_torch2.11_v0.21.0_20260519",
+  "remoteUser": "root",
+  "workspaceFolder": "/root",
+  "runArgs": [
+    "--name", "vllm-dev",
+    "--ipc=host",
+    "--privileged",
+    "--cap-add=CAP_SYS_ADMIN",
+    "--device=/dev/kfd",
+    "--device=/dev/dri",
+    "--device=/dev/mem",
+    "--group-add", "render",
+    "--cap-add=SYS_PTRACE",
+    "--security-opt", "seccomp=unconfined",
+    "-v", "/sys:/sys:ro",
+    "-p", "8080:8000"
+  ],
+  "customizations": {
+    "vscode": {
+      "settings": {
+        "terminal.integrated.defaultProfile.linux": "bash"
+      }
+    }
+  }
+}

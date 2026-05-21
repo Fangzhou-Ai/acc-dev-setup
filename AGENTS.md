@@ -1,0 +1,41 @@
+# Agent instructions — prepare_env
+
+**Canonical reference:** [`example_setup.md`](./example_setup.md) — follow it for salloc, podman, docker shim, and VS Code attach. Scripts automate those steps.
+
+## Session start
+
+**Ask the user immediately:**
+
+> Do you want to set up a MI355 GPU node and `vllm-dev` container now?
+
+Do not run `salloc`, `podman`, or setup scripts until they answer.
+
+| Answer | Action |
+|--------|--------|
+| **Yes** | Run `start_allocation.sh` or the workflow in `.cursor/rules/mi355-container-setup.mdc` |
+| **No** | Continue with whatever they asked |
+
+## What “setup” means
+
+1. `salloc` an exclusive MI355 node (8h job `vllm-dev-setup`)
+2. On that node: pull ROCm vLLM image, start `vllm-dev` with GPU devices
+3. Install oh-my-bash, Cursor Agent, **Claude Code** (`claude`), **Codex** (`codex`), **tmux** in the container
+4. Configure podman-as-docker shim for VS Code Dev Containers
+5. Write `connection_info.txt` with node name and job ID
+
+## User connects from local VS Code
+
+1. Remote-SSH → `mi355-gpu-XX` (see `connection_info.txt`)
+2. Dev Containers → Attach to Running Container → `vllm-dev` → user `root` (workspace `/root`)
+
+## Scripts
+
+- `start_allocation.sh` — allocate + setup (preferred)
+- `setup_on_node.sh` — setup only (when job already exists)
+- `example_setup.md` — **canonical** manual + automated workflow reference
+
+## Teardown
+
+```bash
+scancel <JOBID>
+```
