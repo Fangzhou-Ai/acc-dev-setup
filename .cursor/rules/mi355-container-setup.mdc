@@ -74,7 +74,7 @@ Wait for yes/no. Do not run SLURM or podman commands until they confirm.
 | VS Code dockerPath | `.vscode-server/data/Machine/settings.json` on shared home |
 | Container name | `vllm-dev` |
 | ROCm (stable) | **7.2.3** — see `rocm_stack.env` |
-| Image | `rocm/vllm-dev:rocm7.2.3_torch2.11_v0.21.0_20260519` |
+| Image | `vllm/vllm-openai-rocm:nightly` (see `rocm_stack.env`) |
 
 ## Release when done
 

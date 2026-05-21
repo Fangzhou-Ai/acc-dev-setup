@@ -40,9 +40,9 @@ Run all `podman` commands on the **allocated compute node** (e.g. `mi355-gpu-40`
 |-------|---------|-------|
 | **ROCm (stable)** | **7.2.3** | AMD [latest stable release](https://github.com/ROCm/ROCm/releases/latest) (May 2026); official MI355X support |
 | Host module | `rocm/7.2.3` | `module load` on compute nodes |
-| Container image | `rocm/vllm-dev:rocm7.2.3_torch2.11_v0.21.0_20260519` | Matches host ROCm user-space |
+| Container image | `vllm/vllm-openai-rocm:nightly` | Latest vLLM OpenAI ROCm build (default dev container) |
 
-Pinned in [`rocm_stack.env`](./rocm_stack.env). **Avoid** `rocm/7.13.x` and `rocm7.13` image tags — those are preview/nightly builds on this cluster.
+Pinned in [`rocm_stack.env`](./rocm_stack.env). Container name stays **`vllm-dev`** for VS Code attach.
 
 ### Load ROCm (required before GPU checks)
 
@@ -57,7 +57,7 @@ Automated scripts call `load_rocm_env.sh` automatically.
 
 ---
 
-## 2. Podman pull AMD vLLM image
+## 2. Podman pull vLLM OpenAI ROCm image
 
 ```bash
 source prepare_env/rocm_stack.env   # sets VLLM_IMAGE
@@ -70,11 +70,12 @@ Use your own image tag here if you update the stack.
 
 ## 3. Podman create container (port forwarding)
 
-Use the image ID from `podman images` (example: `9564a9f428e0`):
+Use the image ID from `podman images` (example: `a1e987b52de4`):
 
 ```bash
 podman run -d \
     --name vllm-dev \
+    --entrypoint /bin/bash \
     --ipc=host \
     --privileged \
     --cap-add=CAP_SYS_ADMIN \
@@ -89,8 +90,8 @@ podman run -d \
     -v /shared/data/amd_int/models:/shared/data/amd_int/models \
     -e HF_HOME=/shared/data/amd_int/models \
     -p 8080:8000 \
-    9564a9f428e0 \
-    sleep infinity
+    a1e987b52de4 \
+    -c "sleep infinity"
 ```
 
 `-v /sys:/sys:ro` lets `rocminfo` / `rocm-smi` inside the container read KFD GPU topology (without it you get `ROCk module is NOT loaded`).
@@ -196,7 +197,8 @@ Script: `install_container_tools.sh` (tmux, Claude + Codex).
 |--------|---------|
 | `start_allocation.sh` | `salloc` + `setup_on_node.sh` + update `connection_info.txt` |
 | `setup_on_node.sh` | Container + shim + extras (needs existing allocation) |
-| `rocm_stack.env` | Pinned ROCm 7.2.3 + vLLM image tag (single source of truth) |
+| `rocm_stack.env` | Host ROCm 7.2.3 + default `vllm-dev` / `vllm-openai-rocm:nightly` |
+| `copy_ssh_to_container.sh` | Sync cluster `~/.ssh` into container for private git |
 | `load_rocm_env.sh` | `module load rocm/7.2.3` + amdgpu/KFD checks |
 | `install_container_tools.sh` | tmux + Claude Code + Codex |
 

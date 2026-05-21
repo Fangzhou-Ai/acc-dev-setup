@@ -2,9 +2,8 @@
 # Create a dev container with ROCm GPU access + Oh My Bash, Cursor, Claude, Codex, tmux.
 # Run ON the allocated compute node (via srun or after ssh).
 #
-# Examples:
-#   IMAGE=docker.io/vllm/vllm-openai-rocm:nightly-... CONTAINER_NAME=vllm-openai-rocm PORT_MAP=8081:8000 ./setup_container.sh
-#   ./setup_container.sh   # defaults from rocm_stack.env (vllm-dev)
+# Defaults from rocm_stack.env: vllm-dev + vllm/vllm-openai-rocm:nightly on 8080:8000
+# Override: IMAGE=... CONTAINER_NAME=... PORT_MAP=... ./setup_container.sh
 set -euo pipefail
 
 SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
@@ -16,14 +15,9 @@ CONTAINER_NAME="${CONTAINER_NAME:-vllm-dev}"
 PORT_MAP="${PORT_MAP:-8080:8000}"
 HOME_DIR="${HOME_DIR:-/shared/amdgpu/home/fai_qle}"
 
-# vllm-openai* images use `vllm` as entrypoint; override for sleep infinity / exec setup.
-VLLM_OPENAI_ENTRYPOINT=()
-if [[ "${IMAGE}" == *vllm-openai* ]] || [[ "${IMAGE}" == *vllm/vllm-openai* ]]; then
-  VLLM_OPENAI_ENTRYPOINT=(--entrypoint /bin/bash)
-  CONTAINER_CMD=(-c "sleep infinity")
-else
-  CONTAINER_CMD=(sleep infinity)
-fi
+# vllm-openai-rocm uses `vllm` as entrypoint; override for sleep infinity / exec setup.
+VLLM_OPENAI_ENTRYPOINT=(--entrypoint /bin/bash)
+CONTAINER_CMD=(-c "sleep infinity")
 
 # shellcheck source=load_rocm_env.sh
 source "${SCRIPT_DIR}/load_rocm_env.sh"
@@ -34,6 +28,14 @@ echo "==> Container: ${CONTAINER_NAME} (${PORT_MAP})"
 echo "==> Mounts: ${DATA_MOUNT} (scratch), ${HF_HOME_MOUNT} (HF_HOME)"
 
 mkdir -p "${HF_HOME}" 2>/dev/null || true
+
+# Remove legacy container names from the old rocm/vllm-dev + vllm-openai-rocm split.
+for legacy in vllm-openai-rocm; do
+  if podman container exists "${legacy}" 2>/dev/null; then
+    echo "==> Removing legacy container ${legacy}..."
+    podman rm -f "${legacy}"
+  fi
+done
 
 echo "==> Pulling image (skip if cached)..."
 podman pull "docker://${IMAGE}" || true
@@ -139,7 +141,7 @@ if [[ "${GPU_COUNT}" -eq 0 ]]; then
   exit 1
 fi
 echo "    ${GPU_COUNT} GPU agent(s) visible in container"
-command -v vllm >/dev/null && podman exec "${CONTAINER_NAME}" bash -c 'vllm --version 2>&1 | head -1 | sed "s/^/vllm: /"' || true
+podman exec "${CONTAINER_NAME}" bash -c 'vllm --version 2>&1 | head -1 | sed "s/^/vllm: /"' || true
 
 echo "==> Container status:"
 podman ps --filter "name=${CONTAINER_NAME}"

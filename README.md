@@ -10,19 +10,10 @@
 ./start_allocation.sh
 ```
 
-## Your active allocation (2026-05-20)
-
-| Field | Value |
-|-------|-------|
-| **SLURM job** | `2513` (`vllm-dev-setup`) |
-| **Node** | **`mi355-gpu-39`** |
-| **Container** | `vllm-dev` (port `8080→8000`) |
-| **Release job** | `scancel 2513` |
-
-See [connection_info.txt](./connection_info.txt) for SSH config snippet.
+Active allocation details (node, job ID, image) are written to [connection_info.txt](./connection_info.txt) after `./start_allocation.sh`.
 
 ```bash
-# On mi355-gpu-39 (after ssh):
+# On your allocated node (after ssh):
 podman ps --filter name=vllm-dev
 /shared/amdgpu/home/fai_qle/bin/docker ps   # same, for VS Code
 ```
@@ -101,8 +92,8 @@ If Dev Containers cannot find Docker, set in VS Code settings (Remote window):
 | Claude Code | `root` | `claude` — run once to log in |
 | OpenAI Codex | system | `codex` in `/usr/local/bin` — run once to log in |
 | tmux | system | `tmux` via apt |
-| ROCm (stable) | 7.2.3 | See [`rocm_stack.env`](./rocm_stack.env) |
-| ROCm vLLM image | — | `rocm/vllm-dev:rocm7.2.3_torch2.11_v0.21.0_20260519` |
+| Host ROCm module | 7.2.3 | See [`rocm_stack.env`](./rocm_stack.env) |
+| vLLM container image | — | `vllm/vllm-openai-rocm:nightly` (container name `vllm-dev`) |
 
 Port `8080` on the host maps to `8000` in the container (vLLM API default).
 

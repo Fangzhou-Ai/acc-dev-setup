@@ -1,5 +1,6 @@
 #!/usr/bin/env bash
-# Install CLI tools inside vllm-dev container. Run via: podman exec vllm-dev bash -s < install_container_tools.sh
+# Install CLI tools inside the default vllm-dev container (vllm-openai-rocm:nightly).
+# Run via: podman exec vllm-dev bash -s < install_container_tools.sh
 set -euo pipefail
 
 echo "==> tmux..."

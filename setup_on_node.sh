@@ -1,19 +1,16 @@
 #!/usr/bin/env bash
 # Run ON the allocated compute node (via srun or after ssh).
-# Wrapper around setup_container.sh (default: vllm-dev on port 8080).
+# Wrapper around setup_container.sh (defaults from rocm_stack.env).
 set -euo pipefail
 
 SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
-export IMAGE="${IMAGE:-}"
-export CONTAINER_NAME="${CONTAINER_NAME:-vllm-dev}"
-export PORT_MAP="${PORT_MAP:-8080:8000}"
+# shellcheck source=rocm_stack.env
+source "${SCRIPT_DIR}/rocm_stack.env"
 
 "${SCRIPT_DIR}/setup_container.sh"
 
 # Persist module load for interactive SSH on this node (idempotent).
 HOME_DIR="${HOME_DIR:-/shared/amdgpu/home/fai_qle}"
-# shellcheck source=rocm_stack.env
-source "${SCRIPT_DIR}/rocm_stack.env"
 BASHRC_SNIPPET="${HOME_DIR}/.bashrc.d/mi355-rocm.sh"
 mkdir -p "${HOME_DIR}/.bashrc.d"
 cat > "${BASHRC_SNIPPET}" <<EOF
@@ -36,4 +33,5 @@ echo ""
 echo "SUCCESS on $(hostname)"
 echo "NODE=$(hostname)"
 echo "CONTAINER=${CONTAINER_NAME}"
+echo "IMAGE=${VLLM_IMAGE}"
 echo "JOB_READY=1"
