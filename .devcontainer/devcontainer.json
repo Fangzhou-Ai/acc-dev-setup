@@ -2,10 +2,10 @@
   "name": "vllm-dev (vLLM OpenAI ROCm)",
   "image": "docker.io/vllm/vllm-openai-rocm:nightly",
   "remoteUser": "root",
-  "workspaceFolder": "/root",
+  "workspaceFolder": "/shared/amdgpu/home/fai_qle",
   "runArgs": [
     "--name", "vllm-dev",
-    "--workdir", "/root",
+    "--workdir", "/shared/amdgpu/home/fai_qle",
     "--entrypoint", "/bin/bash",
     "--ipc=host",
     "--privileged",
@@ -19,6 +19,7 @@
     "-v", "/sys:/sys:ro",
     "-v", "/data:/data",
     "-v", "/shared/data/amd_int/models:/shared/data/amd_int/models",
+    "-v", "/shared/amdgpu/home/fai_qle:/shared/amdgpu/home/fai_qle",
     "-e", "HF_HOME=/shared/data/amd_int/models",
     "-p", "8080:8000"
   ],

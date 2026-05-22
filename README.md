@@ -71,7 +71,7 @@ Test in PowerShell: `ssh mi355-gpu-39`
 2. **Command Palette** → **Dev Containers: Attach to Running Container...** → **`vllm-dev`**
 3. Remote user: **`root`**
 
-VS Code should open **`/root`** (not `/root/vllm` or `/app/vllm`). If it opens a old folder, use **Dev Containers: Open Named Configuration File** → `vllm-dev` → set `"workspaceFolder": "/root"` per [`attached-container.vllm-dev.json`](./attached-container.vllm-dev.json). vLLM sources in the image live under `/app/vllm` if you need them.
+VS Code should open **`/shared/amdgpu/home/fai_qle`** (not `/root/vllm` or `/app/vllm`). Edits under that path persist on shared NFS after the container is removed. If it opens an old folder, use **Dev Containers: Open Named Configuration File** → `vllm-dev` → set `"workspaceFolder": "/shared/amdgpu/home/fai_qle"` per [`attached-container.vllm-dev.json`](./attached-container.vllm-dev.json). vLLM sources in the image live under `/app/vllm` if you need them.
 
 Machine settings on the node already point VS Code at the podman shim:
 

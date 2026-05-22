@@ -75,6 +75,7 @@ Use the image ID from `podman images` (example: `a1e987b52de4`):
 ```bash
 podman run -d \
     --name vllm-dev \
+    --workdir /shared/amdgpu/home/fai_qle \
     --entrypoint /bin/bash \
     --ipc=host \
     --privileged \
@@ -88,6 +89,7 @@ podman run -d \
     -v /sys:/sys:ro \
     -v /data:/data \
     -v /shared/data/amd_int/models:/shared/data/amd_int/models \
+    -v /shared/amdgpu/home/fai_qle:/shared/amdgpu/home/fai_qle \
     -e HF_HOME=/shared/data/amd_int/models \
     -p 8080:8000 \
     a1e987b52de4 \
@@ -96,7 +98,7 @@ podman run -d \
 
 `-v /sys:/sys:ro` lets `rocminfo` / `rocm-smi` inside the container read KFD GPU topology (without it you get `ROCk module is NOT loaded`).
 
-Always mount `/data` (local scratch) and `/shared/data/amd_int/models` with `HF_HOME=/shared/data/amd_int/models` (shared NFS — reuse weights across nodes/jobs). `setup_container.sh` / `setup_on_node.sh` do this automatically.
+Always mount `/data` (local scratch), `/shared/data/amd_int/models` with `HF_HOME=/shared/data/amd_int/models` (shared NFS — reuse weights across nodes/jobs), and `/shared/amdgpu/home/fai_qle` (shared home — edits survive container removal). `setup_container.sh` / `setup_on_node.sh` do this automatically.
 
 `setup_on_node.sh` resolves the image ID automatically.
 
@@ -169,11 +171,11 @@ EOF
 1. Install **Remote - SSH** and **Dev Containers** extensions.
 2. **Remote-SSH: Connect to Host...** → your node (e.g. `mi355-gpu-40`).
 3. **Dev Containers: Attach to Running Container...** → `vllm-dev`.
-4. Remote user: **`root`** — workspace should open at **`/root`** (put your own files there).
+4. Remote user: **`root`** — workspace should open at **`/shared/amdgpu/home/fai_qle`** (your shared home; edits persist after the container is removed).
 
-Setup sets container `--workdir /root` and `dev.containers.metadata` so attach defaults to `/root`, not `/app/vllm` or a remembered `/root/vllm` clone.
+Setup sets container `--workdir /shared/amdgpu/home/fai_qle` and `dev.containers.metadata` so attach defaults to your home, not `/app/vllm` or a remembered `/root/vllm` clone.
 
-**If VS Code still opens `/root/vllm`:** it is reusing a previous attach session. On your PC run **Dev Containers: Open Named Configuration File** → pick **`vllm-dev`** → ensure `"workspaceFolder": "/root"` (see [`attached-container.vllm-dev.json`](./attached-container.vllm-dev.json)). Then re-attach, or use **File → Open Folder** → `/root`.
+**If VS Code still opens `/root/vllm` or `/root`:** it is reusing a previous attach session. On your PC run **Dev Containers: Open Named Configuration File** → pick **`vllm-dev`** → ensure `"workspaceFolder": "/shared/amdgpu/home/fai_qle"` (see [`attached-container.vllm-dev.json`](./attached-container.vllm-dev.json)). Then re-attach, or use **File → Open Folder** → `/shared/amdgpu/home/fai_qle`.
 
 ---
 

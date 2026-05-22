@@ -32,7 +32,7 @@ After the container is created, **always report the container name** to the user
 ## User connects from local VS Code
 
 1. Remote-SSH → `mi355-gpu-XX` (see `connection_info.txt`)
-2. Dev Containers → Attach to Running Container → `vllm-dev` → user `root` (workspace `/root`)
+2. Dev Containers → Attach to Running Container → `vllm-dev` → user `root` (workspace `/shared/amdgpu/home/fai_qle`)
 
 ## Scripts
 

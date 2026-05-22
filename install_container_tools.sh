@@ -6,7 +6,7 @@ set -euo pipefail
 echo "==> tmux..."
 if ! command -v tmux >/dev/null 2>&1; then
   export DEBIAN_FRONTEND=noninteractive
-  apt-get update -qq && apt-get install -y -qq tmux
+  apt-get update -qq && apt-get install -y -qq tmux ncurses-term
 else
   echo "    tmux already installed: $(tmux -V)"
 fi

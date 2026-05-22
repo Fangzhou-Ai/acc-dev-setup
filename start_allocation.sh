@@ -65,7 +65,7 @@ CONN="${SCRIPT_DIR}/connection_info.txt"
   echo "    ProxyJump amd-login"
   echo "    ServerAliveInterval 60"
   echo ""
-  echo "# VS Code: Remote-SSH -> ${NODE} -> Dev Containers: Attach -> vllm-dev (user: root, folder: /root)"
+  echo "# VS Code: Remote-SSH -> ${NODE} -> Dev Containers: Attach -> vllm-dev (user: root, folder: ${HOME_DIR})"
   echo "# Release: scancel ${JOBID}"
 } > "${CONN}"
 

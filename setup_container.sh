@@ -13,7 +13,7 @@ source "${SCRIPT_DIR}/rocm_stack.env"
 IMAGE="${IMAGE:-${VLLM_IMAGE}}"
 CONTAINER_NAME="${CONTAINER_NAME:-vllm-dev}"
 PORT_MAP="${PORT_MAP:-8080:8000}"
-HOME_DIR="${HOME_DIR:-/shared/amdgpu/home/fai_qle}"
+HOME_DIR="${HOME_DIR:-${HOME_MOUNT:-/shared/amdgpu/home/fai_qle}}"
 
 # vllm-openai-rocm uses `vllm` as entrypoint; override for sleep infinity / exec setup.
 VLLM_OPENAI_ENTRYPOINT=(--entrypoint /bin/bash)
@@ -25,7 +25,7 @@ source "${SCRIPT_DIR}/load_rocm_env.sh"
 echo "==> Node: $(hostname)"
 echo "==> Image: ${IMAGE}"
 echo "==> Container: ${CONTAINER_NAME} (${PORT_MAP})"
-echo "==> Mounts: ${DATA_MOUNT} (scratch), ${HF_HOME_MOUNT} (HF_HOME)"
+echo "==> Mounts: ${DATA_MOUNT} (scratch), ${HF_HOME_MOUNT} (HF_HOME), ${HOME_DIR} (persistent home)"
 
 mkdir -p "${HF_HOME}" 2>/dev/null || true
 
@@ -54,12 +54,12 @@ if podman container exists "${CONTAINER_NAME}" 2>/dev/null; then
   podman rm -f "${CONTAINER_NAME}"
 fi
 
-DEVCONTAINER_METADATA='{"workspaceFolder":"/root","remoteUser":"root"}'
+DEVCONTAINER_METADATA="{\"workspaceFolder\":\"${HOME_DIR}\",\"remoteUser\":\"root\"}"
 
 echo "==> Starting container ${CONTAINER_NAME}..."
 podman run -d \
   --name "${CONTAINER_NAME}" \
-  --workdir /root \
+  --workdir "${HOME_DIR}" \
   --label "dev.containers.metadata=${DEVCONTAINER_METADATA}" \
   "${VLLM_OPENAI_ENTRYPOINT[@]}" \
   --ipc=host \
@@ -75,6 +75,7 @@ podman run -d \
   -v /sys:/sys:ro \
   -v "${DATA_MOUNT}:${DATA_MOUNT}" \
   -v "${HF_HOME_MOUNT}:${HF_HOME_MOUNT}" \
+  -v "${HOME_DIR}:${HOME_DIR}" \
   -e "HF_HOME=${HF_HOME}" \
   -p "${PORT_MAP}" \
   "${IMAGE_ID}" \
@@ -82,7 +83,7 @@ podman run -d \
 
 echo "==> Base packages..."
 podman exec "${CONTAINER_NAME}" bash -c \
-  'export DEBIAN_FRONTEND=noninteractive; apt-get update -qq && apt-get install -y -qq git curl wget sudo unzip openssh-client ca-certificates tmux 2>&1 | tail -3'
+  'export DEBIAN_FRONTEND=noninteractive; apt-get update -qq && apt-get install -y -qq git curl wget sudo unzip openssh-client ca-certificates tmux ncurses-term 2>&1 | tail -3'
 
 echo "==> vscode user..."
 podman exec "${CONTAINER_NAME}" bash -c \

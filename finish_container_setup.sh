@@ -7,10 +7,11 @@ SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
 # shellcheck source=rocm_stack.env
 source "${SCRIPT_DIR}/rocm_stack.env"
 
-echo "==> Dev container metadata (default workspace /root)..."
-podman exec "${CONTAINER_NAME}" mkdir -p /root/.devcontainer
+echo "==> Dev container metadata (default workspace ${HOME_DIR:-/shared/amdgpu/home/fai_qle})..."
+WORKSPACE="${HOME_DIR:-/shared/amdgpu/home/fai_qle}"
+podman exec "${CONTAINER_NAME}" mkdir -p "${WORKSPACE}/.devcontainer"
 podman cp "${SCRIPT_DIR}/container.devcontainer.json" \
-  "${CONTAINER_NAME}:/root/.devcontainer/devcontainer.json"
+  "${CONTAINER_NAME}:${WORKSPACE}/.devcontainer/devcontainer.json"
 
 echo "==> HF_HOME=${HF_HOME} in ${CONTAINER_NAME}..."
 podman exec "${CONTAINER_NAME}" bash -c \
@@ -46,7 +47,7 @@ echo "==> Verify mounts + tools..."
 podman exec "${CONTAINER_NAME}" bash -lc "
 echo HF_HOME=\$HF_HOME
 test -d '${HF_HOME}' && echo 'HF mount: OK'
-mount | grep -E '/data|amd_int/models' || true
+mount | grep -E '/data|amd_int/models|amdgpu/home/fai_qle' || true
 export PATH=\"/root/.local/bin:/usr/local/bin:\$PATH\"
 command -v agent >/dev/null && agent --version 2>&1 | head -1 | sed 's/^/agent: /' || echo 'agent: MISSING'
 command -v claude >/dev/null && claude --version 2>&1 | head -1 | sed 's/^/claude: /' || echo 'claude: MISSING'

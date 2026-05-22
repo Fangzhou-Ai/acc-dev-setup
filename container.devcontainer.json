@@ -1,5 +1,5 @@
 {
   "name": "vllm-dev",
   "remoteUser": "root",
-  "workspaceFolder": "/root"
+  "workspaceFolder": "/shared/amdgpu/home/fai_qle"
 }

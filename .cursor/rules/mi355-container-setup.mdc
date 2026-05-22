@@ -56,7 +56,9 @@ Wait for yes/no. Do not run SLURM or podman commands until they confirm.
    **Container rules (always):**
    - Mount `-v /data:/data` (local scratch)
    - Mount `-v /shared/data/amd_int/models:/shared/data/amd_int/models`
+   - Mount `-v /shared/amdgpu/home/fai_qle:/shared/amdgpu/home/fai_qle` (persistent home — file edits survive container removal)
    - Set `HF_HOME=/shared/data/amd_int/models` (`-e` at run + `/etc/profile.d` + `.bashrc` for root/vscode)
+   - Set attach workspace to `/shared/amdgpu/home/fai_qle` (`--workdir`, `dev.containers.metadata`, `container.devcontainer.json`)
    - `vllm-openai*` images: `--entrypoint /bin/bash -c "sleep infinity"` (default entrypoint is `vllm`)
    - Install **tmux** (`apt-get install tmux` in `setup_container.sh`; also in `install_container_tools.sh`)
    - Install: Oh My Bash, Cursor agent, Claude Code, Codex (`install_container_tools.sh`)
@@ -67,7 +69,7 @@ Wait for yes/no. Do not run SLURM or podman commands until they confirm.
 5. **Tell the user** how to connect from local VS Code:
    - SSH host = allocated node (e.g. `mi355-gpu-39`)
    - ProxyJump `amd-login`, user `fai_qle`
-   - Dev Containers → Attach to Running Container → `vllm-dev`, user `root` (workspace `/root`)
+   - Dev Containers → Attach to Running Container → `vllm-dev`, user `root` (workspace `/shared/amdgpu/home/fai_qle`)
    - See `README.md` and `connection_info.txt`
 
 ## Key paths
@@ -77,6 +79,7 @@ Wait for yes/no. Do not run SLURM or podman commands until they confirm.
 | Setup script | `setup_container.sh` (wrapper: `setup_on_node.sh`) |
 | Local scratch | `/data` → `/data` |
 | HF models/cache | `/shared/data/amd_int/models` → same path, `HF_HOME` set |
+| Persistent home | `/shared/amdgpu/home/fai_qle` → same path (default attach workspace) |
 | AI CLIs install | `install_container_tools.sh` (tmux, Claude Code, Codex) |
 | One-shot alloc+setup | `start_allocation.sh` |
 | Podman→docker shim | `/shared/amdgpu/home/fai_qle/bin/docker` |
