@@ -5,7 +5,7 @@ set -euo pipefail
 SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
 # shellcheck source=rocm_stack.env
 source "${SCRIPT_DIR}/rocm_stack.env"
-TIME="${TIME:-08:00:00}"
+TIME="${TIME:-7-00:00:00}"
 JOB_NAME="${JOB_NAME:-vllm-dev-setup}"
 
 RESERVATIONS=(

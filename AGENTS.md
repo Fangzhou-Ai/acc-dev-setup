@@ -23,7 +23,7 @@ After the container is created, **always report the container name** to the user
 
 ## What “setup” means
 
-1. `salloc` an exclusive MI355 node (8h job `vllm-dev-setup`)
+1. `salloc` an exclusive MI355 node (1-week job `vllm-dev-setup`)
 2. On that node: pull default `vllm/vllm-openai-rocm:nightly`, start `vllm-dev` with GPU devices (unless user overrode `IMAGE` / `CONTAINER_NAME` above)
 3. Install oh-my-bash, Cursor Agent, **Claude Code** (`claude`), **Codex** (`codex`), **tmux** in the container; copy host `~/.ssh` into the container for private `git clone`
 4. Configure podman-as-docker shim for VS Code Dev Containers

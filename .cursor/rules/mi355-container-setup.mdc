@@ -26,15 +26,15 @@ Wait for yes/no. Do not run SLURM or podman commands until they confirm.
    - `squeue -u fai_qle`
    - If a `vllm-dev-setup` job is already running, reuse that node; skip new `salloc` unless user wants a fresh one.
 
-2. **Allocate a node** (pick first reservation that succeeds; 8h default)
+2. **Allocate a node** (pick first reservation that succeeds; 1-week default)
    ```bash
    salloc --reservation=mi355-gpu-34_gpu-39_gpu-40_gpu-49_gpu-50_gpu-51_gpu-55_gpu-56_reservation \
-     --exclusive --account=wrh --mem=0 -N1 --time=08:00:00 -J vllm-dev-setup --no-shell
+     --exclusive --account=wrh --mem=0 -N1 --time=7-00:00:00 -J vllm-dev-setup --no-shell
    ```
    OR second reservation:
    ```bash
    salloc --reservation=mi355-gpu-41_gpu-42_gpu-43_gpu-44_gpu-45_gpu-46_gpu-47_gpu-48_reservation \
-     --exclusive --account=wrh --mem=0 -N1 --time=08:00:00 -J vllm-dev-setup --no-shell
+     --exclusive --account=wrh --mem=0 -N1 --time=7-00:00:00 -J vllm-dev-setup --no-shell
    ```
 
 3. **Run setup on the allocated node** (use `setup_container.sh` — canonical; `setup_on_node.sh` wraps it)

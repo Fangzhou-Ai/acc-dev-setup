@@ -30,7 +30,7 @@ salloc --reservation=mi355-gpu-34_gpu-39_gpu-40_gpu-49_gpu-50_gpu-51_gpu-55_gpu-
 salloc --reservation=mi355-gpu-41_gpu-42_gpu-43_gpu-44_gpu-45_gpu-46_gpu-47_gpu-48_reservation --exclusive --account=wrh --mem=0
 ```
 
-Automated scripts add: `-N1 --time=08:00:00 -J vllm-dev-setup --no-shell`
+Automated scripts add: `-N1 --time=7-00:00:00 -J vllm-dev-setup --no-shell`
 
 Run all `podman` commands on the **allocated compute node** (e.g. `mi355-gpu-40`), not the SLURM controller.
 
