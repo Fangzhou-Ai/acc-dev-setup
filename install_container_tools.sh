@@ -26,7 +26,9 @@ if ! command -v codex >/dev/null 2>&1; then
     aarch64|arm64) CODEX_ASSET="codex-aarch64-unknown-linux-musl.tar.gz" ;;
     *) echo "ERROR: unsupported arch for Codex: ${ARCH}" >&2; exit 1 ;;
   esac
-  CODEX_TAG="rust-v0.132.0"
+  # Resolve the latest release tag (follow the /releases/latest redirect)
+  CODEX_TAG="$(curl -fsSLI -o /dev/null -w '%{url_effective}' https://github.com/openai/codex/releases/latest | sed 's#.*/tag/##')"
+  [[ -z "${CODEX_TAG}" ]] && { echo "ERROR: could not resolve latest codex tag" >&2; exit 1; }
   CODEX_URL="https://github.com/openai/codex/releases/download/${CODEX_TAG}/${CODEX_ASSET}"
   tmpdir="$(mktemp -d)"
   curl -fsSL "${CODEX_URL}" -o "${tmpdir}/codex.tar.gz"

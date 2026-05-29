@@ -15,6 +15,23 @@ CONTAINER_NAME="${CONTAINER_NAME:-vllm-dev}"
 PORT_MAP="${PORT_MAP:-8080:8000}"
 HOME_DIR="${HOME_DIR:-${HOME_MOUNT:-/shared/amdgpu/home/fai_qle}}"
 
+DATA_MOUNT_HOST="${DATA_MOUNT}"
+DATA_MOUNT_CONTAINER="${DATA_MOUNT}"
+if [[ ! -d "${DATA_MOUNT_HOST}" ]] && ! mkdir -p "${DATA_MOUNT_HOST}" 2>/dev/null; then
+  DATA_MOUNT_HOST="${HOME_DIR}/scratch/data"
+  DATA_MOUNT_CONTAINER="/data"
+  mkdir -p "${DATA_MOUNT_HOST}"
+  echo "==> Note: ${DATA_MOUNT} unavailable on this node; using ${DATA_MOUNT_HOST} -> ${DATA_MOUNT_CONTAINER}"
+fi
+
+HF_HOME_HOST="${HF_HOME_MOUNT:-${HF_HOME:-/shared/data/amd_int/models}}"
+if [[ ! -d "${HF_HOME_HOST}" ]] && ! mkdir -p "${HF_HOME_HOST}" 2>/dev/null; then
+  HF_HOME_HOST="${HOME_DIR}/scratch/models"
+  HF_HOME="${HF_HOME_HOST}"
+  mkdir -p "${HF_HOME_HOST}"
+  echo "==> Note: default HF_HOME unavailable; using ${HF_HOME_HOST}"
+fi
+
 # vllm-openai-rocm uses `vllm` as entrypoint; override for sleep infinity / exec setup.
 VLLM_OPENAI_ENTRYPOINT=(--entrypoint /bin/bash)
 CONTAINER_CMD=(-c "sleep infinity")
@@ -25,9 +42,9 @@ source "${SCRIPT_DIR}/load_rocm_env.sh"
 echo "==> Node: $(hostname)"
 echo "==> Image: ${IMAGE}"
 echo "==> Container: ${CONTAINER_NAME} (${PORT_MAP})"
-echo "==> Mounts: ${DATA_MOUNT} (scratch), ${HF_HOME_MOUNT} (HF_HOME), ${HOME_DIR} (persistent home)"
+echo "==> Mounts: ${DATA_MOUNT_HOST} -> ${DATA_MOUNT_CONTAINER} (scratch), ${HF_HOME_HOST} (HF_HOME), ${HOME_DIR} (persistent home)"
 
-mkdir -p "${HF_HOME}" 2>/dev/null || true
+mkdir -p "${HF_HOME_HOST}" 2>/dev/null || true
 
 # Remove legacy container names from the old rocm/vllm-dev + vllm-openai-rocm split.
 for legacy in vllm-openai-rocm; do
@@ -73,10 +90,10 @@ podman run -d \
   --cap-add=SYS_PTRACE \
   --security-opt seccomp=unconfined \
   -v /sys:/sys:ro \
-  -v "${DATA_MOUNT}:${DATA_MOUNT}" \
-  -v "${HF_HOME_MOUNT}:${HF_HOME_MOUNT}" \
+  -v "${DATA_MOUNT_HOST}:${DATA_MOUNT_CONTAINER}" \
+  -v "${HF_HOME_HOST}:${HF_HOME_HOST}" \
   -v "${HOME_DIR}:${HOME_DIR}" \
-  -e "HF_HOME=${HF_HOME}" \
+  -e "HF_HOME=${HF_HOME_HOST}" \
   -p "${PORT_MAP}" \
   "${IMAGE_ID}" \
   "${CONTAINER_CMD[@]}"
@@ -103,18 +120,22 @@ echo "==> Claude Code..."
 podman exec "${CONTAINER_NAME}" bash -c \
   'if command -v claude >/dev/null 2>&1; then claude --version | head -1; else curl -fsSL https://claude.ai/install.sh | bash; fi'
 
-echo "==> Codex CLI..."
+echo "==> Codex CLI (latest)..."
 podman exec "${CONTAINER_NAME}" bash -c 'command -v codex >/dev/null 2>&1 && codex --version | head -1 || {
   ARCH=$(uname -m)
   CODEX_ASSET=codex-x86_64-unknown-linux-musl.tar.gz
   [[ "$ARCH" == aarch64 || "$ARCH" == arm64 ]] && CODEX_ASSET=codex-aarch64-unknown-linux-musl.tar.gz
+  # Resolve the latest release tag (follow the /releases/latest redirect)
+  CODEX_TAG=$(curl -fsSLI -o /dev/null -w "%{url_effective}" https://github.com/openai/codex/releases/latest | sed "s#.*/tag/##")
+  [[ -z "$CODEX_TAG" ]] && { echo "ERROR: could not resolve latest codex tag" >&2; exit 1; }
   tmp=$(mktemp -d)
-  curl -fsSL "https://github.com/openai/codex/releases/download/rust-v0.132.0/${CODEX_ASSET}" -o "$tmp/codex.tar.gz"
+  curl -fsSL "https://github.com/openai/codex/releases/download/${CODEX_TAG}/${CODEX_ASSET}" -o "$tmp/codex.tar.gz"
   tar -xzf "$tmp/codex.tar.gz" -C "$tmp"
   install -m 755 "$(find "$tmp" -maxdepth 1 -type f -name "codex-*" | head -1)" /usr/local/bin/codex
   codex --version | head -1
 }'
 
+export HF_HOME="${HF_HOME_HOST}"
 "${SCRIPT_DIR}/finish_container_setup.sh" "${CONTAINER_NAME}"
 
 echo "==> Podman-as-docker shim + VS Code Machine settings..."
